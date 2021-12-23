@@ -191,7 +191,7 @@ class PdfFileRenderer {
 }
 
 /// This runnable executes all the image fetch in separate thread.
-class PdfRunnable rendererimplements Runnable {
+class PdfRunnable implements Runnable {
     private byte[] imageBytes = null;
     final private PdfRenderer renderer;
     final private Result resultPdf;
@@ -217,7 +217,7 @@ class PdfRunnable rendererimplements Runnable {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void run() {
-        page = .openPage(pageIndex - 1);
+        page = renderer.openPage(pageIndex - 1);
         if (scale < 1.75) {
             scale = 1.75;
         }
