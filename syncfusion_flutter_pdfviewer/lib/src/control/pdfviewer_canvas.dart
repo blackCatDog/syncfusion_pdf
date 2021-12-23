@@ -347,6 +347,11 @@ class CanvasRenderBox extends RenderBox {
 
   /// Handles the tap up event
   void handleTapUp(TapUpDetails details) {
+    print("------->handleTapUp");
+    findTextWhileHover(details.localPosition);
+    findTOC(details.localPosition);
+    _textSelectionHelper.viewId = 2;
+    _performSelection_test(details.localPosition);
     if (textCollection == null && !_textSelectionHelper.enableTapSelection) {
       clearSelection();
     }
@@ -993,6 +998,11 @@ class CanvasRenderBox extends RenderBox {
           textLineIndex++) {
         if (_textSelectionHelper.cursorTextLines![textLineIndex].bounds
             .contains(details * heightPercentage)) {
+          print(_textSelectionHelper.cursorTextLines![textLineIndex].text);
+          print(_textSelectionHelper.cursorTextLines![textLineIndex].bounds.top);
+          print(_textSelectionHelper.cursorTextLines![textLineIndex].bounds.bottom);
+          print(_textSelectionHelper.cursorTextLines![textLineIndex].bounds.left);
+          print(_textSelectionHelper.cursorTextLines![textLineIndex].bounds.right);
           return _textSelectionHelper.cursorTextLines![textLineIndex];
         }
       }
@@ -1025,6 +1035,39 @@ class CanvasRenderBox extends RenderBox {
       }
     }
     return false;
+  }
+
+  /// 点击后找到单个文字和位置等信息
+  void _performSelection_test(Offset offset) {
+    _textSelectionHelper.copiedText = '';
+    final double heightPercentage =
+        pdfDocument!.pages[_textSelectionHelper.viewId!].size.height / height;
+    _textSelectionHelper.heightPercentage = heightPercentage;
+    _textSelectionHelper.textLines = PdfTextExtractor(pdfDocument!)
+        .extractTextLines(startPageIndex: _textSelectionHelper.viewId);
+    for (int textLineIndex = 0;
+    textLineIndex < _textSelectionHelper.textLines!.length;
+    textLineIndex++) {
+      final TextLine line = _textSelectionHelper.textLines![textLineIndex];
+      final List<TextWord> textWordCollection = line.wordCollection;
+      for (int wordIndex = 0;
+      wordIndex < textWordCollection.length;
+      wordIndex++) {
+        final TextWord textWord = textWordCollection[wordIndex];
+        final Rect wordBounds = textWord.bounds;
+        if (_tapDetails != null &&
+            wordBounds.contains(_tapDetails! * heightPercentage)) {
+          // _textSelectionHelper.startBubbleLine =
+          // _textSelectionHelper.textLines![textLineIndex];
+          _textSelectionHelper.copiedText = textWord.text;
+          print("copiedtext = "+textWord.text );
+          print(textWord.bounds.top);
+          print(textWord.bounds.bottom);
+          print(textWord.bounds.left);
+          print(textWord.bounds.right);
+        }
+      }
+    }
   }
 
   /// Get the selection details like copiedText,globalSelectedRegion.
