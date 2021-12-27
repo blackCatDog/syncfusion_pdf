@@ -330,7 +330,7 @@ class CanvasRenderBox extends RenderBox {
     return constraints.biggest;
   }
 
-  /// Handles the tap down event
+  /// Handles the tap down event   处理点击事件
   void handleTapDown(TapDownDetails details) {
     _tapDetails = details.localPosition;
     if (kIsDesktop &&
@@ -345,12 +345,17 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Handles the tap up event
+  /// Handles the tap up event    点击后抬起手指
   void handleTapUp(TapUpDetails details) {
     print("------->handleTapUp");
-    findTextWhileHover(details.localPosition);
-    findTOC(details.localPosition);
-    _textSelectionHelper.viewId = 2;
+    // findTextWhileHover(details.localPosition);
+    // findTOC(details.localPosition);
+    // _textSelectionHelper.viewId = 2;
+    _textSelectionHelper.viewId = 0;
+    if (_textSelectionHelper.textLines == null || _textSelectionHelper.viewId  != pageIndex) {
+      _textSelectionHelper.viewId = pageIndex;
+    }
+
     _performSelection_test(details.localPosition);
     if (textCollection == null && !_textSelectionHelper.enableTapSelection) {
       clearSelection();
@@ -445,7 +450,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Handles the long press started event.cursorMode
+  /// Handles the long press started event.cursorMode   处理长按启动事件。cursormode
   void handleLongPressStart(LongPressStartDetails details) {
     if (kIsDesktop && !isMobileWebView && pdfDocument != null) {
       clearMouseSelection();
@@ -460,7 +465,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Handles the Drag start event.
+  /// Handles the Drag start event.   处理拖动开始事件。
   void handleDragStart(DragStartDetails details) {
     _enableMouseSelection(details, 'DragStart');
     if (_textSelectionHelper.selectionEnabled) {
@@ -540,13 +545,14 @@ class CanvasRenderBox extends RenderBox {
     _enableMouseSelection(details, 'DoubleTap');
   }
 
-  /// Handles the triple tap down event.
+  /// Handles the triple tap down event.     处理三重点击事件。
   void handleTripleTapDown(PointerDownEvent details) {
     _textSelectionHelper.enableTapSelection = true;
     _enableMouseSelection(details, 'TripleTap');
   }
 
   /// Enable mouse selection for mouse pointer,double tap and triple tap selection.
+  /// 为鼠标指针启用鼠标选择，双击和三重点击选择。
   void _enableMouseSelection(dynamic details, String gestureType) {
     if (kIsDesktop &&
         !isMobileWebView &&
@@ -647,7 +653,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Enable mouse text selection.
+  /// Enable mouse text selection.    启用鼠标文本选择。
   void _enableSelection(String gestureType) {
     if (!_textSelectionHelper.selectionEnabled) {
       if (gestureType == 'DragStart') {
@@ -682,7 +688,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Triggers when scrolling of page is ended.
+  /// Triggers when scrolling of page is ended.  当滚动页面结束时触发。
   void scrollEnded() {
     if (_textSelectionHelper.selectionEnabled ||
         _textSelectionHelper.mouseSelectionEnabled) {
@@ -690,7 +696,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Updates context menu position while scrolling and double tap zoom.
+  /// Updates context menu position while scrolling and double tap zoom.    当滚动和双击缩放时，更新上下文菜单位置。
   void updateContextMenuPosition() {
     scrollStarted();
     if (_textSelectionHelper.selectionEnabled ||
@@ -701,7 +707,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Updates the selection details when panning over the viewport.
+  /// Updates the selection details when panning over the viewport.     当在视窗上平移时，更新选择细节。
   void _updateSelectionPan(DragUpdateDetails details) {
     _scrollWhileSelection();
     final double currentOffset = pdfViewerController.scrollOffset.dy;
@@ -768,7 +774,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Used to scroll manually.
+  /// Used to scroll manually.      用于手动滚动。
   void scroll(bool isReachedTop, bool isSelectionScroll) {
     if (isSelectionScroll) {
       double endBubbleValue = isReachedTop ? -3 : 3;
@@ -802,7 +808,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Check the tap position same as the start bubble position.
+  /// Check the tap position same as the start bubble position.    检查轻拍位置与开始气泡位置相同。
   bool _checkStartBubblePosition(Offset details) {
     if (_textSelectionHelper.selectionEnabled) {
       final double startBubbleX = _textSelectionHelper.startBubbleX! /
@@ -819,7 +825,7 @@ class CanvasRenderBox extends RenderBox {
     return false;
   }
 
-  /// Check the tap position same as the end bubble position.
+  /// Check the tap position same as the end bubble position.    检查抽头位置与尾泡位置相同。
   bool _checkEndBubblePosition(Offset details) {
     if (_textSelectionHelper.selectionEnabled) {
       final double endBubbleX = _textSelectionHelper.endBubbleX! /
@@ -852,7 +858,7 @@ class CanvasRenderBox extends RenderBox {
     return textLines;
   }
 
-  /// Gets rotated offset.
+  /// Gets rotated offset.   得到旋转的偏移量。
   Offset getRotatedOffset(
       Offset offset, int pageIndex, PdfPageRotateAngle angle) {
     if (angle != PdfPageRotateAngle.rotateAngle0) {
@@ -875,7 +881,7 @@ class CanvasRenderBox extends RenderBox {
     return offset;
   }
 
-  /// Gets rotated text bounds.
+  /// Gets rotated text bounds.   得到旋转的文本边界。
   Rect getRotatedTextBounds(
       Rect textBounds, int pageIndex, PdfPageRotateAngle angle) {
     Rect? rotatedTextBounds;
@@ -910,7 +916,7 @@ class CanvasRenderBox extends RenderBox {
     return rotatedTextBounds;
   }
 
-  /// Enable text selection.
+  /// Enable text selection.   使文本的选择。
   void enableSelection() {
     if (enableTextSelection) {
       if (_textSelectionHelper.selectionEnabled) {
@@ -922,7 +928,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Ensuring history for text selection.
+  /// Ensuring history for text selection.   确保文本选择的历史记录。
   void _ensureHistoryEntry() {
     Future<dynamic>.delayed(Duration.zero, () async {
       triggerValueCallback();
@@ -938,7 +944,7 @@ class CanvasRenderBox extends RenderBox {
     });
   }
 
-  /// Remove history for Text Selection.
+  /// Remove history for Text Selection.    删除文本选择的历史记录。
   void _handleHistoryEntryRemoved() {
     if (textCollection != null && _textSelectionHelper.historyEntry != null) {
       Navigator.of(context).maybePop();
@@ -947,7 +953,7 @@ class CanvasRenderBox extends RenderBox {
     clearSelection();
   }
 
-  /// clears Text Selection.
+  /// clears Text Selection.    清除文本的选择。
   bool clearSelection() {
     clearMouseSelection();
     final bool clearTextSelection = !_textSelectionHelper.selectionEnabled;
@@ -968,7 +974,7 @@ class CanvasRenderBox extends RenderBox {
     return clearTextSelection;
   }
 
-  /// Dispose the text selection.
+  /// Dispose the text selection.   处理文本选择。
   void disposeSelection() {
     disposeMouseSelection();
     _textSelectionHelper.firstSelectedGlyph = null;
@@ -981,7 +987,7 @@ class CanvasRenderBox extends RenderBox {
     _textSelectionHelper.heightPercentage = null;
   }
 
-  /// Find the text while hover by mouse.
+  /// Find the text while hover by mouse.    在鼠标悬停时找到文本。
   TextLine? findTextWhileHover(Offset details) {
     if (_textSelectionHelper.cursorTextLines == null ||
         _textSelectionHelper.cursorPageNumber != pageIndex) {
@@ -998,11 +1004,13 @@ class CanvasRenderBox extends RenderBox {
           textLineIndex++) {
         if (_textSelectionHelper.cursorTextLines![textLineIndex].bounds
             .contains(details * heightPercentage)) {
-          print(_textSelectionHelper.cursorTextLines![textLineIndex].text);
-          print(_textSelectionHelper.cursorTextLines![textLineIndex].bounds.top);
-          print(_textSelectionHelper.cursorTextLines![textLineIndex].bounds.bottom);
-          print(_textSelectionHelper.cursorTextLines![textLineIndex].bounds.left);
-          print(_textSelectionHelper.cursorTextLines![textLineIndex].bounds.right);
+          var nowTime1 = DateTime.now();//获取当前时间
+          print("AAAA---paint hang" +nowTime1.toString());
+          // print(_textSelectionHelper.cursorTextLines![textLineIndex].text);
+          // print(_textSelectionHelper.cursorTextLines![textLineIndex].bounds.top);
+          // print(_textSelectionHelper.cursorTextLines![textLineIndex].bounds.bottom);
+          // print(_textSelectionHelper.cursorTextLines![textLineIndex].bounds.left);
+          // print(_textSelectionHelper.cursorTextLines![textLineIndex].bounds.right);
           return _textSelectionHelper.cursorTextLines![textLineIndex];
         }
       }
@@ -1010,7 +1018,7 @@ class CanvasRenderBox extends RenderBox {
     return null;
   }
 
-  /// Find the TOC bounds while hover by mouse.
+  /// Find the TOC bounds while hover by mouse.    鼠标悬停时找到TOC边界。
   bool findTOC(Offset details) {
     if (_textSelectionHelper.cursorPageNumber != pageIndex) {
       _textSelectionHelper.cursorPageNumber = pageIndex;
@@ -1043,39 +1051,115 @@ class CanvasRenderBox extends RenderBox {
     final double heightPercentage =
         pdfDocument!.pages[_textSelectionHelper.viewId!].size.height / height;
     _textSelectionHelper.heightPercentage = heightPercentage;
-    _textSelectionHelper.textLines = PdfTextExtractor(pdfDocument!)
-        .extractTextLines(startPageIndex: _textSelectionHelper.viewId);
-    for (int textLineIndex = 0;
-    textLineIndex < _textSelectionHelper.textLines!.length;
-    textLineIndex++) {
+    // if (_textSelectionHelper.textLines == null || _textSelectionHelper.viewId != pageIndex) {
+    //   _textSelectionHelper.viewId = pageIndex;
+      var nowTime1 = DateTime.now();//获取当前时间
+      print("AAAA---paint textline" +nowTime1.toString());
+      _textSelectionHelper.textLines = PdfTextExtractor(pdfDocument!).extractTextLines(startPageIndex: pageIndex);
+      var nowTime2 = DateTime.now();//获取当前时间
+      print("AAAA---paint textline2" +nowTime2.toString());
+    // }
+    for (int textLineIndex = 0; textLineIndex < _textSelectionHelper.textLines!.length; textLineIndex++) {
       final TextLine line = _textSelectionHelper.textLines![textLineIndex];
       final List<TextWord> textWordCollection = line.wordCollection;
-      for (int wordIndex = 0;
-      wordIndex < textWordCollection.length;
-      wordIndex++) {
+      for (int wordIndex = 0; wordIndex < textWordCollection.length; wordIndex++) {
         final TextWord textWord = textWordCollection[wordIndex];
+
         final Rect wordBounds = textWord.bounds;
         if (_tapDetails != null &&
             wordBounds.contains(_tapDetails! * heightPercentage)) {
           // _textSelectionHelper.startBubbleLine =
           // _textSelectionHelper.textLines![textLineIndex];
           _textSelectionHelper.copiedText = textWord.text;
+          if (onTextSelectionChanged != null) {
+            onTextSelectionChanged!(PdfTextSelectionChangedDetails(textWord.text, textWord.bounds));
+          }
+          highText = textWord;
+          var nowTime1 = DateTime.now();//获取当前时间
+          print("AAAA---paint font" +nowTime1.toString());
           print("copiedtext = "+textWord.text );
-          print(textWord.bounds.top);
-          print(textWord.bounds.bottom);
-          print(textWord.bounds.left);
-          print(textWord.bounds.right);
+          // print(textWord.bounds.top);
+          // print(textWord.bounds.bottom);
+          // print(textWord.bounds.left);
+          // print(textWord.bounds.right);
         }
       }
     }
   }
+  TextWord? highText;
+  /// 点击后的文字高亮
+  void _highLightText(Canvas canvas, Offset offset) {
+    // if (textCollection != null && !_textSelectionHelper.selectionEnabled) {
+    // if(!_textSelectionHelper.selectionEnabled){
+    //   if (_textSelectionHelper.textLines == null || _textSelectionHelper.viewId  != pageIndex) {
+    //     _textSelectionHelper.viewId = pageIndex;
+    //   }
+    //   _performSelection_test(offset);
+    // }
 
-  /// Get the selection details like copiedText,globalSelectedRegion.
+    if(highText != null && !_textSelectionHelper.selectionEnabled){
+
+
+      final Paint searchTextPaint = Paint()
+        ..color = searchTextHighlightColor.withOpacity(0.3);
+      final Paint currentInstancePaint = Paint()
+        ..color = searchTextHighlightColor.withOpacity(0.6);
+      // int _pageNumber = 0;
+      // for (int i = 0; i < textCollection!.length; i++) {
+      //   final MatchedItem item = textCollection![i];
+        final double heightPercentage = pdfDocument!.pages[_textSelectionHelper.viewId!].size.height / height;
+
+      var nowTime1 = DateTime.now();//获取当前时间
+      print("AAAA---paint high" +nowTime1.toString());
+      // print(highText!.bounds.top);
+      // print(highText!.bounds.bottom);
+      // print(highText!.bounds.left);
+      // print(highText!.bounds.right);
+      //   if (pageIndex == item.pageIndex) {
+          canvas.drawRect(
+              offset.translate(
+                  highText!.bounds.left / heightPercentage,
+                  highText!.bounds.top / heightPercentage) &
+              Size(highText!.bounds.width / heightPercentage,
+                  highText!.bounds.height / heightPercentage),
+              searchTextPaint);
+      canvas.drawRect(
+                      offset.translate(highText!.bounds.left / heightPercentage,
+                          highText!.bounds.top / heightPercentage) &
+                      Size(highText!.bounds.width / heightPercentage,
+                          highText!.bounds.height / heightPercentage),
+                      currentInstancePaint);
+      // enableSelection();
+      // markNeedsPaint();
+      // scroll(true,true);
+    }
+    //     }
+    //     final MatchedItem matchedItem =
+    //     textCollection![pdfTextSearchResult.currentInstanceIndex - 1];
+    //     if (matchedItem.pageIndex == pageIndex) {
+    //       if (matchedItem.pageIndex + 1 != _pageNumber) {
+    //         final Rect bounds = matchedItem.bounds;
+    //         canvas.drawRect(
+    //             offset.translate(bounds.left / heightPercentage,
+    //                 bounds.top / heightPercentage) &
+    //             Size(bounds.width / heightPercentage,
+    //                 bounds.height / heightPercentage),
+    //             currentInstancePaint);
+    //         _pageNumber = matchedItem.pageIndex + 1;
+    //       }
+    //     } else if (item.pageIndex > pageIndex) {
+    //       break;
+    //     }
+    //   }
+    // }
+  }
+
+  /// Get the selection details like copiedText,globalSelectedRegion.     获取选择细节，如copytext, globalselecteregion。
   TextSelectionHelper getSelectionDetails() {
     return _textSelectionHelper;
   }
 
-  /// Clear the mouse pointer text selection.
+  /// Clear the mouse pointer text selection.   清除鼠标指针文本选择。
   void clearMouseSelection() {
     if ((!_textSelectionHelper.enableTapSelection ||
             (_textSelectionHelper.globalSelectedRegion != null &&
@@ -1091,7 +1175,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Check the text glyph inside the selected region.
+  /// Check the text glyph inside the selected region.     检查选定区域内的文本符号。
   bool checkGlyphInRegion(
       TextGlyph textGlyph, TextGlyph startGlyph, Offset details) {
     final double glyphCenterX = textGlyph.bounds.center.dx;
@@ -1115,7 +1199,7 @@ class CanvasRenderBox extends RenderBox {
     return false;
   }
 
-  /// Dispose the mouse selection.
+  /// Dispose the mouse selection.    处理鼠标选择。
   void disposeMouseSelection() {
     _textSelectionHelper.textLines = null;
     _textSelectionHelper.viewId = null;
@@ -1123,7 +1207,7 @@ class CanvasRenderBox extends RenderBox {
     _textSelectionHelper.globalSelectedRegion = null;
   }
 
-  /// Draw the start bubble.
+  /// Draw the start bubble.    绘制开始气泡。
   void _drawStartBubble(
       Canvas canvas, Paint bubblePaint, Offset startBubbleOffset) {
     canvas.drawRRect(
@@ -1139,7 +1223,7 @@ class CanvasRenderBox extends RenderBox {
         bubblePaint);
   }
 
-  /// Draw the end bubble.
+  /// Draw the end bubble.  画出最后的气泡。
   void _drawEndBubble(
       Canvas canvas, Paint bubblePaint, Offset endBubbleOffset) {
     canvas.drawRRect(
@@ -1155,12 +1239,12 @@ class CanvasRenderBox extends RenderBox {
         bubblePaint);
   }
 
-  /// Draw the Rect for selected text.
+  /// Draw the Rect for selected text.   绘制选定文本的矩形。
   void _drawTextRect(Canvas canvas, Paint textPaint, Rect textRectOffset) {
     canvas.drawRect(textRectOffset, textPaint);
   }
 
-  /// Gets the selected text lines.
+  /// Gets the selected text lines.    获取选定的文本行。
   List<PdfTextLine>? getSelectedTextLines() {
     if (_textSelectionHelper.selectionEnabled ||
         _textSelectionHelper.mouseSelectionEnabled) {
@@ -1169,7 +1253,7 @@ class CanvasRenderBox extends RenderBox {
     return null;
   }
 
-  /// Perform document link navigation.
+  /// Perform document link navigation.    执行文档链接导航。
   void _performDocumentLinkNavigation(Canvas canvas, Offset offset) {
     if (pageIndex == _viewId) {
       if (_isTOCTapped) {
@@ -1201,7 +1285,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Perform text search.
+  /// Perform text search.    执行文本搜索。
   void _performTextSearch(Canvas canvas, Offset offset) {
     if (textCollection != null && !_textSelectionHelper.selectionEnabled) {
       final Paint searchTextPaint = Paint()
@@ -1242,7 +1326,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Perform mouse or touch selection.
+  /// Perform mouse or touch selection.   执行鼠标或触摸选择。
   void _performSelection(
       Canvas canvas, Offset offset, Paint textPaint, Paint bubblePaint) {
     if (_textSelectionHelper.viewId == pageIndex) {
@@ -1347,7 +1431,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Consider the line feed for the copied TextLines.
+  /// Consider the line feed for the copied TextLines.      考虑复制的TextLines的换行。
   String _copiedTextLines(List<PdfTextLine> textLines) {
     String copiedText = '';
     for (int lineIndex = 0; lineIndex < textLines.length; lineIndex++) {
@@ -1360,7 +1444,7 @@ class CanvasRenderBox extends RenderBox {
     return copiedText;
   }
 
-  /// Finds start and end index of selected textLine.
+  /// Finds start and end index of selected textLine.     查找所选textLine的开始和结束索引。
   void _findStartAndEndIndex(
       Offset details, double heightPercentage, bool isMouseSelection,
       {Rect startPoint = Rect.zero}) {
@@ -1389,7 +1473,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Selects the textLine which is inside the selected region.
+  /// Selects the textLine which is inside the selected region.    选择选定区域内的textLine。
   void _selectTextLinesInRegion(Canvas canvas, Offset offset, Paint textPaint,
       double heightPercentage, bool isMouseSelection,
       {Offset startPoint = Offset.zero, Rect endPoint = Rect.zero}) {
@@ -1462,6 +1546,9 @@ class CanvasRenderBox extends RenderBox {
 
     _performDocumentLinkNavigation(canvas, offset);
     _performTextSearch(canvas, offset);
+    _highLightText(canvas, offset);
+    var nowTime1 = DateTime.now();//获取当前时间
+    print("AAAA---paint" +nowTime1.toString());
 
     if (_textSelectionHelper.mouseSelectionEnabled &&
         _textSelectionHelper.textLines != null &&
