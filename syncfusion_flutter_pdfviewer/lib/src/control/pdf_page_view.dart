@@ -33,6 +33,7 @@ class PdfPageView extends StatefulWidget {
     this.enableDocumentLinkAnnotation,
     this.enableTextSelection,
     this.onTextSelectionChanged,
+    this.onSelectionText,
     this.onTextSelectionDragStarted,
     this.onTextSelectionDragEnded,
     this.searchTextHighlightColor,
@@ -90,6 +91,9 @@ class PdfPageView extends StatefulWidget {
 
   /// Triggers when text selection is changed.
   final PdfTextSelectionChangedCallback? onTextSelectionChanged;
+
+  /// Triggers when text selection is changed.
+  final PdfSelectionTextCallback? onSelectionText;
 
   /// Triggers when text selection dragging started.
   final VoidCallback onTextSelectionDragStarted;
@@ -273,6 +277,7 @@ class PdfPageViewState extends State<PdfPageView> {
               widget.enableDocumentLinkAnnotation,
               widget.enableTextSelection,
               widget.onTextSelectionChanged,
+              widget.onSelectionText,
               widget.onTextSelectionDragStarted,
               widget.onTextSelectionDragEnded,
               widget.textCollection,

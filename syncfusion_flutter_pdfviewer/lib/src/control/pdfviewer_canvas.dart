@@ -27,6 +27,7 @@ class PdfViewerCanvas extends LeafRenderObjectWidget {
     this.enableDocumentLinkNavigation,
     this.enableTextSelection,
     this.onTextSelectionChanged,
+    this.onSelectionText,
     this.onTextSelectionDragStarted,
     this.onTextSelectionDragEnded,
     this.textCollection,
@@ -73,6 +74,9 @@ class PdfViewerCanvas extends LeafRenderObjectWidget {
   /// Triggers when text selection is changed.
   final PdfTextSelectionChangedCallback? onTextSelectionChanged;
 
+  /// Triggers when text selection is changed.
+  final PdfSelectionTextCallback? onSelectionText;
+
   ///Highlighting color of searched text
   final Color searchTextHighlightColor;
 
@@ -117,6 +121,7 @@ class PdfViewerCanvas extends LeafRenderObjectWidget {
         enableDocumentLinkNavigation,
         enableTextSelection,
         onTextSelectionChanged,
+        onSelectionText,
         onTextSelectionDragStarted,
         onTextSelectionDragEnded,
         textCollection,
@@ -136,6 +141,7 @@ class PdfViewerCanvas extends LeafRenderObjectWidget {
       ..height = height
       ..width = width
       ..onTextSelectionChanged = onTextSelectionChanged
+      ..onSelectionText = onSelectionText
       ..pageIndex = pageIndex
       ..textCollection = textCollection
       ..interactionMode = interactionMode
@@ -167,6 +173,7 @@ class CanvasRenderBox extends RenderBox {
       this.enableDocumentLinkNavigation,
       this.enableTextSelection,
       this.onTextSelectionChanged,
+      this.onSelectionText,
       this.onTextSelectionDragStarted,
       this.onTextSelectionDragEnded,
       this.textCollection,
@@ -233,6 +240,9 @@ class CanvasRenderBox extends RenderBox {
 
   /// Triggers when text selection is changed.
   late PdfTextSelectionChangedCallback? onTextSelectionChanged;
+
+  /// Triggers when text selection is changed.
+  late PdfSelectionTextCallback? onSelectionText;
 
   /// Indicates interaction mode of pdfViewer.
   late PdfInteractionMode interactionMode;
@@ -1048,16 +1058,24 @@ class CanvasRenderBox extends RenderBox {
   /// 点击后找到单个文字和位置等信息
   void _performSelection_test(Offset offset) {
     _textSelectionHelper.copiedText = '';
-    final double heightPercentage =
-        pdfDocument!.pages[_textSelectionHelper.viewId!].size.height / height;
+
+    final double heightPercentage = pdfDocument!.pages[_textSelectionHelper.viewId!].size.height / height;
     _textSelectionHelper.heightPercentage = heightPercentage;
+
+      _textSelectionHelper.viewId = pageIndex;
+
+      if (onSelectionText != null) {
+        onSelectionText!(PdfSelectionTextDetails(_textSelectionHelper.viewId!, height,_textSelectionHelper.heightPercentage,offset));
+      }
+
+
     // if (_textSelectionHelper.textLines == null || _textSelectionHelper.viewId != pageIndex) {
     //   _textSelectionHelper.viewId = pageIndex;
-      var nowTime1 = DateTime.now();//获取当前时间
-      print("AAAA---paint textline" +nowTime1.toString());
-      _textSelectionHelper.textLines = PdfTextExtractor(pdfDocument!).extractTextLines(startPageIndex: pageIndex);
-      var nowTime2 = DateTime.now();//获取当前时间
-      print("AAAA---paint textline2" +nowTime2.toString());
+      // var nowTime1 = DateTime.now();//获取当前时间
+      // print("AAAA---paint textline" +nowTime1.toString());
+      // _textSelectionHelper.textLines = textLines;//PdfTextExtractor(pdfDocument!).extractTextLines(startPageIndex: pageIndex);
+      // var nowTime2 = DateTime.now();//获取当前时间
+      // print("AAAA---paint textline2" +nowTime2.toString());
     // }
     for (int textLineIndex = 0; textLineIndex < _textSelectionHelper.textLines!.length; textLineIndex++) {
       final TextLine line = _textSelectionHelper.textLines![textLineIndex];
@@ -1089,14 +1107,6 @@ class CanvasRenderBox extends RenderBox {
   TextWord? highText;
   /// 点击后的文字高亮
   void _highLightText(Canvas canvas, Offset offset) {
-    // if (textCollection != null && !_textSelectionHelper.selectionEnabled) {
-    // if(!_textSelectionHelper.selectionEnabled){
-    //   if (_textSelectionHelper.textLines == null || _textSelectionHelper.viewId  != pageIndex) {
-    //     _textSelectionHelper.viewId = pageIndex;
-    //   }
-    //   _performSelection_test(offset);
-    // }
-
     if(highText != null && !_textSelectionHelper.selectionEnabled){
 
 
@@ -1129,6 +1139,7 @@ class CanvasRenderBox extends RenderBox {
                       Size(highText!.bounds.width / heightPercentage,
                           highText!.bounds.height / heightPercentage),
                       currentInstancePaint);
+
       // enableSelection();
       // markNeedsPaint();
       // scroll(true,true);
@@ -1547,8 +1558,8 @@ class CanvasRenderBox extends RenderBox {
     _performDocumentLinkNavigation(canvas, offset);
     _performTextSearch(canvas, offset);
     _highLightText(canvas, offset);
-    var nowTime1 = DateTime.now();//获取当前时间
-    print("AAAA---paint" +nowTime1.toString());
+    // var nowTime1 = DateTime.now();//获取当前时间
+    // print("AAAA---paint" +nowTime1.toString());
 
     if (_textSelectionHelper.mouseSelectionEnabled &&
         _textSelectionHelper.textLines != null &&
@@ -1797,5 +1808,18 @@ class CanvasRenderBox extends RenderBox {
       }
       _performSelection(canvas, offset, textPaint, bubblePaint);
     }
+  }
+
+  void setHighLightText(TextWord? highLightText) {
+    this.highText = highLightText;
+  }
+  List<TextLine>? textLines = [];
+  void setTextLinesList( List<TextLine>? textLines){
+    // for(int i = 0; i < textLines!.length;i++){
+    //   this.textLines!.add(textLines[i]);
+    // }
+    this.textLines = textLines;
+    _textSelectionHelper.textLines = textLines;
+    //
   }
 }

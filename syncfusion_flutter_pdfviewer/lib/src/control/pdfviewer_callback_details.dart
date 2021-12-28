@@ -129,3 +129,50 @@ class PdfTextSelectionChangedDetails {
     return _globalSelectedRegion;
   }
 }
+
+/// Holds the details for the [SfPdfViewer.onTextSelectionChanged] callback,
+/// such as [globalSelectedRegion] and [selectedText].
+class PdfSelectionTextDetails {
+  /// pageNum 页数
+  /// height 页面的高度
+  /// heightPercentage pdf页面和高度的百分比
+  /// offset 点击的坐标
+  PdfSelectionTextDetails(
+      int? pageNum, double? height,double? heightPercentage,Offset? offset) {
+    _pageNum = pageNum;
+    _height = height;
+    _heightPercentage = heightPercentage;
+    _offset = offset;
+    // _textLines = textLines;
+  }
+
+  int? _pageNum;
+  double? _height;
+  double? _heightPercentage;
+  Offset? _offset;
+  List<TextLine>? _textLines;
+
+  /// Selected text value.
+  int? get pageNum {
+    return _pageNum;
+  }
+
+  double? get height {
+    return _height;
+  }
+
+  double? get heightPercentage {
+    return _heightPercentage;
+  }
+
+  Offset? get offset {
+    return _offset;
+  }
+
+  /// Selected text value.
+  List<TextLine>? get textLines {
+    return _textLines;
+  }
+
+}
+

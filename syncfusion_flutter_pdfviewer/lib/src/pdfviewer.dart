@@ -42,6 +42,10 @@ import 'control/single_page_view.dart';
 typedef PdfTextSelectionChangedCallback = void Function(
     PdfTextSelectionChangedDetails details);
 
+/// Signature for [SfPdfViewer.onTextSelectionChanged] callback.
+typedef PdfSelectionTextCallback = void Function(
+    PdfSelectionTextDetails details);
+
 /// Signature for [SfPdfViewer.onDocumentLoaded] callback.
 typedef PdfDocumentLoadedCallback = void Function(
     PdfDocumentLoadedDetails details);
@@ -130,6 +134,7 @@ class SfPdfViewer extends StatefulWidget {
     this.enableDoubleTapZooming = true,
     this.enableTextSelection = true,
     this.onTextSelectionChanged,
+        this.onSelectionText,
     this.onDocumentLoadFailed,
     this.enableDocumentLinkAnnotation = true,
     this.canShowPaginationDialog = true,
@@ -180,6 +185,7 @@ class SfPdfViewer extends StatefulWidget {
     this.enableDoubleTapZooming = true,
     this.enableTextSelection = true,
     this.onTextSelectionChanged,
+        this.onSelectionText,
     this.onDocumentLoaded,
     this.onDocumentLoadFailed,
     this.enableDocumentLinkAnnotation = true,
@@ -229,6 +235,7 @@ class SfPdfViewer extends StatefulWidget {
     this.enableDoubleTapZooming = true,
     this.enableTextSelection = true,
     this.onTextSelectionChanged,
+        this.onSelectionText,
     this.onDocumentLoaded,
     this.onDocumentLoadFailed,
     this.enableDocumentLinkAnnotation = true,
@@ -282,6 +289,7 @@ class SfPdfViewer extends StatefulWidget {
     this.enableDoubleTapZooming = true,
     this.enableTextSelection = true,
     this.onTextSelectionChanged,
+        this.onSelectionText,
     this.onDocumentLoaded,
     this.onDocumentLoadFailed,
     this.enableDocumentLinkAnnotation = true,
@@ -652,6 +660,10 @@ class SfPdfViewer extends StatefulWidget {
   /// ```
   final PdfTextSelectionChangedCallback? onTextSelectionChanged;
 
+
+  ///监听点击文字后坐标，页数、高度pdf页面的百分比，高度等信息
+  final PdfSelectionTextCallback? onSelectionText;
+
   /// Called when the page changes in [SfPdfViewer].
   ///
   /// Called in the following scenarios where the page changes
@@ -1007,6 +1019,9 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
     if (widget.onTextSelectionChanged != null) {
       widget
           .onTextSelectionChanged!(PdfTextSelectionChangedDetails(null, null));
+    }
+    if(widget.onSelectionText != null){
+     widget.onSelectionText!(PdfSelectionTextDetails(null,0,0,new Offset(0, 0)));
     }
     _pdfViewerController.removeListener(_handleControllerValueChange);
     WidgetsBinding.instance?.removeObserver(this);
@@ -1983,6 +1998,7 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
                             widget.enableDocumentLinkAnnotation,
                             widget.enableTextSelection,
                             widget.onTextSelectionChanged,
+                            widget.onSelectionText,
                             _handleTextSelectionDragStarted,
                             _handleTextSelectionDragEnded,
                             widget.searchTextHighlightColor,
@@ -3086,7 +3102,27 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
       }
     } else if (property == 'clearTextSelection') {
       _pdfViewerController._clearTextSelection = _clearSelection();
-    } else if (property == 'jumpTo') {
+    }
+    else if (property == 'highTextSelection') {
+      if(_pdfPagesKey[_pdfViewerController.pageNumber]
+          ?.currentState
+          ?.canvasRenderBox !=
+          null){
+        _pdfPagesKey[_pdfViewerController.pageNumber]
+            ?.currentState
+            ?.canvasRenderBox!.setHighLightText(_pdfViewerController.textWord);
+      }
+    }
+    else if (property == 'textLinesListSelection') {
+      if(_pdfPagesKey[_pdfViewerController.pageNumber]
+          ?.currentState
+          ?.canvasRenderBox !=
+          null){
+        _pdfPagesKey[_pdfViewerController.pageNumber]
+            ?.currentState
+            ?.canvasRenderBox!.setTextLinesList(_pdfViewerController.textLines);
+      }
+    }else if (property == 'jumpTo') {
       _clearSelection();
       if (widget.pageLayoutMode == PdfPageLayoutMode.single) {
         if (_previousHorizontalOffset !=
@@ -4227,6 +4263,28 @@ class PdfViewerController extends _ValueChangeNotifier {
     _pageNavigator = null;
     _pdfBookmark = null;
     notifyPropertyChangedListeners();
+  }
+
+  TextWord? textWord;
+  void setHighLightText(TextWord textWord) {
+    this.textWord = textWord;
+    notifyPropertyChangedListeners(
+        property: 'highTextSelection');
+
+  }
+  TextWord? getHighLightText(){
+    return textWord!;
+  }
+
+  List<TextLine>? textLines;
+  void setTextLinesList(List<TextLine>? textLines) {
+    this.textLines = textLines;
+    notifyPropertyChangedListeners(
+        property: 'textLinesListSelection');
+
+  }
+  List<TextLine>? getTextLinesList(){
+    return textLines!;
   }
 }
 
