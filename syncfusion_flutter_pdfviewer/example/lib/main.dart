@@ -61,34 +61,32 @@ class _MyHomePageState extends State<MyHomePage> {
     return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
   }
 
+  List<TextLine>? textLineAll = [];
+  PdfDocument? document;
+
   void _incrementCounter() async{
-    //Load an existing PDF document.
-    // final PdfDocument document =
-    // PdfDocument(inputBytes: File('gis_succinctly.pdf').readAsBytesSync());
-
-    final PdfDocument document = PdfDocument(
+    document = PdfDocument(
         inputBytes: await _readDocumentData('gis_succinctly.pdf'));
-//Extract the text from all the pages.
-//     String text = PdfTextExtractor(document).extractText(startPageIndex: 2);
 
-    // PdfDocument document =
-    // PdfDocument(inputBytes: File('input.pdf').readAsBytesSync());
+    //Extracts the text line collection from the document
+    textLineAll = PdfTextExtractor(document!).extractTextLines(startPageIndex: 2);
 
-//Extracts the text line collection from the document
-    final List<TextLine> textLine =
-    PdfTextExtractor(document).extractTextLines(startPageIndex: 3);
+    // List<MatchedItem> textCollection = PdfTextExtractor(document).findText(
+    //     ['So', 'So'],
+    //     startPageIndex: 1,
+    //     endPageIndex: 2,
+    //     searchOption: TextSearchOption.caseSensitive);
 
-//Gets specific line from the collection
-    TextLine line = textLine[1];
+    //Gets specific line from the collection
+    // TextLine? line = textLineAll![1];
 
-//Gets bounds of the line
-    Rect bounds = line.bounds;
-    print("pdf = "+ line.text);
+    //Gets bounds of the line
+    // Rect bounds = line!.bounds;
 
-//Dispose the document.
-    document.dispose();
+    //Dispose the document.
+    document!.dispose();
   }
-
+  PdfViewerController pdfViewerController = PdfViewerController();
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -97,13 +95,16 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    PdfViewerController _pdfViewerController = PdfViewerController();
+
     late PdfTextSearchResult _searchResult;
+
+
 
     @override
     void initState() {
       _searchResult = PdfTextSearchResult();
-      _pdfViewerController = PdfViewerController();
+      pdfViewerController = PdfViewerController();
+
       super.initState();
     }
 
@@ -118,13 +119,14 @@ class _MyHomePageState extends State<MyHomePage> {
           RaisedButton(child: Text('Copy',style: TextStyle(fontSize: 17)),onPressed: (){
             Clipboard.setData(ClipboardData(text: details.selectedText));
             // _pdfViewerController.clearSelection();
-          },color: Colors.white,elevation: 10,),
+          },color: Colors.red,elevation: 10,),
         ),
       );
       // _overlayState.insert(_overlayEntry);
     }
 
     late OverlayEntry overlayEntry ;
+    bool flog;
 
     return Scaffold(
       appBar: AppBar(
@@ -136,10 +138,11 @@ class _MyHomePageState extends State<MyHomePage> {
               color: Colors.red,
             ),
             onPressed: () async {
-              _searchResult = await _pdfViewerController.searchText('exactly',
+              _searchResult = await pdfViewerController.searchText('exactly',
                   searchOption: TextSearchOption.caseSensitive);
               print(
                   'Total instance count: ${_searchResult.totalInstanceCount}');
+              // _searchResult.clear();
             },
           ),
         ],
@@ -151,6 +154,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: SfPdfViewer.asset("assets/pdf/gis_succinctly.pdf",
               onTextSelectionChanged:
                   (PdfTextSelectionChangedDetails details) {
+
                 if (details.selectedText == null ) {
                   // _overlayEntry.remove();
                   // _overlayEntry = null;
@@ -158,12 +162,34 @@ class _MyHomePageState extends State<MyHomePage> {
                   _showContextMenu(context, details);
                 }
               },
-              // onTapUpListener:(PdfTextSelectionChangedDetails details){
-              //
-              // },
-              controller: _pdfViewerController,
+              onSelectionText:(PdfSelectionTextDetails details){
+                pdfViewerController.setTextLinesList(textLineAll);
+                // for (int textLineIndex = 0; textLineIndex < textLineAll!.length; textLineIndex++) {
+                //   final TextLine? line = textLineAll![textLineIndex];
+                //   final List<TextWord> textWordCollection = line!.wordCollection;
+                //   for (int wordIndex = 0; wordIndex < textWordCollection.length; wordIndex++) {
+                //     final TextWord textWord = textWordCollection[wordIndex];
+                //
+                //     final Rect wordBounds = textWord.bounds;
+                //     if (details.offset != null && wordBounds.contains(details.offset! * details.heightPercentage!)) {
+                //       print("点击的文字是： " + textWord.text);
+                //       // setState(() {});
+                //       pdfViewerController.setHighLightText(textWord);
+                //       var nowTime1 = DateTime.now();//获取当前时间
+                //       print("AAAA---paint font" +nowTime1.toString());
+                //     }
+                //   }
+                // }
+                setState(() {
+                  var nowTime1 = DateTime.now();//获取当前时间
+                  print("AAAA---paint callback " +nowTime1.toString());
+                  flog = true;});
+              },
+              controller: pdfViewerController,
+
               // controller: _pdfViewerController,
             )),
+
 
       ),
       floatingActionButton: FloatingActionButton(
