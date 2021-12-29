@@ -38,6 +38,7 @@ class PdfPageView extends StatefulWidget {
     this.onTextSelectionDragEnded,
     this.searchTextHighlightColor,
     this.textCollection,
+    this.textHighLightCollection,
     this.isMobileWebView,
     this.pdfTextSearchResult,
     this.pdfScrollableStateKey,
@@ -106,6 +107,9 @@ class PdfPageView extends StatefulWidget {
 
   /// Searched text details
   final List<MatchedItem>? textCollection;
+
+  /// 次高亮文字信息
+  final List<MatchedItem>? textHighLightCollection;
 
   /// PdfTextSearchResult instance
   final PdfTextSearchResult pdfTextSearchResult;
@@ -281,6 +285,7 @@ class PdfPageViewState extends State<PdfPageView> {
               widget.onTextSelectionDragStarted,
               widget.onTextSelectionDragEnded,
               widget.textCollection,
+              widget.textHighLightCollection,
               widget.searchTextHighlightColor,
               widget.pdfTextSearchResult,
               widget.isMobileWebView,

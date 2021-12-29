@@ -847,6 +847,7 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
       <int, GlobalKey<PdfPageViewState>>{};
   SystemMouseCursor _cursor = SystemMouseCursors.basic;
   List<MatchedItem>? _textCollection;
+  List<MatchedItem>? _textHighLightCollection;
   PdfTextExtractor? _pdfTextExtractor;
   double _maxScrollExtent = 0;
   Size _pdfDimension = Size.zero;
@@ -2003,6 +2004,7 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
                             _handleTextSelectionDragEnded,
                             widget.searchTextHighlightColor,
                             _textCollection,
+                            _textHighLightCollection,
                             _isMobile,
                             _pdfViewerController._pdfTextSearchResult,
                             _pdfScrollableStateKey,
@@ -2621,6 +2623,19 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
           _getInstanceInPage(_pdfViewerController.pageNumber,
               lookForFirst: isNext);
     }
+
+    if (_textHighLightCollection != null &&
+        _pdfViewerController._pdfTextSearchResult.hasResult &&
+        _pdfViewerController.pageNumber !=
+            (_textHighLightCollection![_pdfViewerController
+                ._pdfTextSearchResult.currentInstanceIndex -
+                1]
+                .pageIndex +
+                1)) {
+      _pdfViewerController._pdfTextSearchResult._currentOccurrenceIndex =
+          _getInstanceInPage(_pdfViewerController.pageNumber,
+              lookForFirst: isNext);
+    }
   }
 
   /// Whenever orientation is changed, PDF page is changed based on viewport
@@ -3134,13 +3149,6 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
       // }
       _isSearchStarted = true;
       _pdfViewerController._pdfTextSearchResult.removeListener(_handleTextSearch);
-      // MatchedItem matchedItem =MatchedItem.;// MatchedItemHelper.initialize("",_pdfViewerController.textLinesAll[0].bounds,_pdfViewerController.pageNum);
-      //
-      // final List<MatchedItem> result = <MatchedItem>[];
-      // result.add(MatchedItemHelper.initialize(
-      //     term, rect, _currentPageIndex));
-      // List<MatchedItem>? textLinesHighLight =;
-      // textLinesHighLight.add(matchedItem);
       _textCollection = _pdfTextExtractor?.findText(<String>[_pdfViewerController._searchText], searchOption: _pdfViewerController._textSearchOption,startPageIndex: 2,text: _pdfViewerController.text,rect:_pdfViewerController.bounds,pageNum: _pdfViewerController.pageNum );
       if (_textCollection != null) {
         if (_textCollection!.isEmpty) {
@@ -3154,6 +3162,28 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
             _jumpToSearchInstance();
           }
           _pdfViewerController._pdfTextSearchResult._totalSearchTextCount = _textCollection!.length;
+          _pdfViewerController._pdfTextSearchResult._updateResult(true);
+          _isSearchInitiated = false;
+        }
+        _pdfViewerController._pdfTextSearchResult.addListener(_handleTextSearch);
+        setState(() {});
+      }
+    }else if (property == 'textHighLightSelection') {
+      _isSearchStarted = true;
+      _pdfViewerController._pdfTextSearchResult.removeListener(_handleTextSearch);
+      _textHighLightCollection = _pdfTextExtractor?.findText(<String>[_pdfViewerController._searchText], searchOption: _pdfViewerController._textSearchOption,startPageIndex: 2,text: _pdfViewerController.text,rect:_pdfViewerController.bounds,pageNum: _pdfViewerController.pageNum );
+      if (_textHighLightCollection != null) {
+        if (_textHighLightCollection!.isEmpty) {
+          _pdfViewerController._pdfTextSearchResult._currentOccurrenceIndex = 0;
+
+          _pdfViewerController._pdfTextSearchResult._totalSearchTextCount = 0;
+          _pdfViewerController._pdfTextSearchResult._updateResult(false);
+        } else {
+          _pdfViewerController._pdfTextSearchResult._currentOccurrenceIndex = _getInstanceInPage(_pdfViewerController.pageNumber);
+          if (_pdfPages.isNotEmpty && !_isSearchInitiated) {
+            _jumpToSearchInstance();
+          }
+          _pdfViewerController._pdfTextSearchResult._totalSearchTextCount = _textHighLightCollection!.length;
           _pdfViewerController._pdfTextSearchResult._updateResult(true);
           _isSearchInitiated = false;
         }
@@ -3255,18 +3285,37 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
   }
 
   int? _jumpToNextInstance(int pageNumber) {
-    for (int i = 0; i < _textCollection!.length; i++) {
-      if (_textCollection![i].pageIndex + 1 >= pageNumber) {
-        return i + 1;
+    if(_textCollection != null){
+      for (int i = 0; i < _textCollection!.length; i++) {
+        if (_textCollection![i].pageIndex + 1 >= pageNumber) {
+          return i + 1;
+        }
+      }
+    }
+    if(_textHighLightCollection != null) {
+      for (int i = 0; i < _textHighLightCollection!.length; i++) {
+        if (_textHighLightCollection![i].pageIndex + 1 >= pageNumber) {
+          return i + 1;
+        }
       }
     }
     return null;
   }
 
   int? _jumpToPreviousInstance(int pageNumber) {
-    for (int i = _textCollection!.length - 1; i > 0; i--) {
-      if (_textCollection![i].pageIndex + 1 <= pageNumber) {
-        return i + 1;
+    if(_textCollection != null){
+      for (int i = _textCollection!.length - 1; i > 0; i--) {
+        if (_textCollection![i].pageIndex + 1 <= pageNumber) {
+          return i + 1;
+        }
+      }
+    }
+
+    if(_textHighLightCollection != null) {
+      for (int i = _textHighLightCollection!.length - 1; i > 0; i--) {
+        if (_textHighLightCollection![i].pageIndex + 1 <= pageNumber) {
+          return i + 1;
+        }
       }
     }
     return null;
@@ -3277,28 +3326,45 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
       _updateSearchInstance(isNext: isNext);
       _isPageChanged = false;
     }
-    final int currentInstancePageIndex = _textCollection![
-                _pdfViewerController._pdfTextSearchResult.currentInstanceIndex -
-                    1]
-            .pageIndex +
-        1;
+    int currentInstancePageIndex = 0;
+    if(_textCollection != null){
+      currentInstancePageIndex = _textCollection![_pdfViewerController._pdfTextSearchResult.currentInstanceIndex - 1].pageIndex + 1;
+    }else if(_textHighLightCollection != null)
+    {
+      currentInstancePageIndex = _textHighLightCollection![_pdfViewerController._pdfTextSearchResult.currentInstanceIndex - 1].pageIndex + 1;
+    }
     Offset topOffset = Offset.zero;
 
     if (_pdfPagesKey[_pdfViewerController.pageNumber]
             ?.currentState
             ?.canvasRenderBox !=
         null) {
-      topOffset = _pdfPagesKey[_pdfViewerController.pageNumber]!
-          .currentState!
-          .canvasRenderBox!
-          .getRotatedTextBounds(
-              _textCollection![_pdfViewerController
-                          ._pdfTextSearchResult.currentInstanceIndex -
-                      1]
-                  .bounds,
-              currentInstancePageIndex - 1,
-              _document!.pages[currentInstancePageIndex - 1].rotation)
-          .topLeft;
+      if(_textCollection != null){
+        topOffset = _pdfPagesKey[_pdfViewerController.pageNumber]!
+            .currentState!
+            .canvasRenderBox!
+            .getRotatedTextBounds(
+            _textCollection![_pdfViewerController
+                ._pdfTextSearchResult.currentInstanceIndex -
+                1]
+                .bounds,
+            currentInstancePageIndex - 1,
+            _document!.pages[currentInstancePageIndex - 1].rotation)
+            .topLeft;
+      }else if(_textHighLightCollection != null)
+      {
+        topOffset = _pdfPagesKey[_pdfViewerController.pageNumber]!
+            .currentState!
+            .canvasRenderBox!
+            .getRotatedTextBounds(
+            _textHighLightCollection![_pdfViewerController
+                ._pdfTextSearchResult.currentInstanceIndex -
+                1]
+                .bounds,
+            currentInstancePageIndex - 1,
+            _document!.pages[currentInstancePageIndex - 1].rotation)
+            .topLeft;
+      }
     }
     final double heightPercentage = (kIsDesktop &&
             !_isMobile &&
@@ -3400,6 +3466,7 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
         setState(() {
           _isSearchStarted = false;
           _textCollection = null;
+          _textHighLightCollection = null;
           _pdfViewerController._pdfTextSearchResult._currentOccurrenceIndex = 0;
           _pdfViewerController._pdfTextSearchResult._totalSearchTextCount = 0;
           _pdfViewerController._pdfTextSearchResult._updateResult(false);
@@ -4340,6 +4407,19 @@ class PdfViewerController extends _ValueChangeNotifier {
         property: 'textInformationListSelection');
   }
 
+
+  /// pagenum 页码
+  /// textlines 页数中行的数据
+  /// linenum 行的数据
+  /// textindex 指定的文字
+  /// 次高亮位置   文字信息
+  void setTextInfomationHighLight(String? text,Rect bounds,int pageNum,){
+    this.pageNum = pageNum;
+    this.text = text;
+    this.bounds = bounds;
+    notifyPropertyChangedListeners(
+        property: 'textHighLightSelection');
+  }
 }
 
 /// PdfTextSearchResult holds the details of TextSearch

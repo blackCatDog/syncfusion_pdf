@@ -31,6 +31,7 @@ class PdfViewerCanvas extends LeafRenderObjectWidget {
     this.onTextSelectionDragStarted,
     this.onTextSelectionDragEnded,
     this.textCollection,
+    this.textHighLightCollection,
     this.searchTextHighlightColor,
     this.pdfTextSearchResult,
     this.isMobileWebView,
@@ -83,6 +84,9 @@ class PdfViewerCanvas extends LeafRenderObjectWidget {
   ///searched text details
   final List<MatchedItem>? textCollection;
 
+  ///显示次高亮文字信息
+  final List<MatchedItem>? textHighLightCollection;
+
   /// PdfTextSearchResult instance
   final PdfTextSearchResult pdfTextSearchResult;
 
@@ -125,6 +129,7 @@ class PdfViewerCanvas extends LeafRenderObjectWidget {
         onTextSelectionDragStarted,
         onTextSelectionDragEnded,
         textCollection,
+        textHighLightCollection,
         searchTextHighlightColor,
         isMobileWebView,
         pdfTextSearchResult,
@@ -144,6 +149,7 @@ class PdfViewerCanvas extends LeafRenderObjectWidget {
       ..onSelectionText = onSelectionText
       ..pageIndex = pageIndex
       ..textCollection = textCollection
+      ..textHighLightCollection = textHighLightCollection
       ..interactionMode = interactionMode
       ..enableTextSelection = enableTextSelection
       ..enableDocumentLinkNavigation = enableDocumentLinkNavigation
@@ -177,6 +183,7 @@ class CanvasRenderBox extends RenderBox {
       this.onTextSelectionDragStarted,
       this.onTextSelectionDragEnded,
       this.textCollection,
+      this.textHighLightCollection,
       this.searchTextHighlightColor,
       this.isMobileWebView,
       this.pdfTextSearchResult,
@@ -252,6 +259,9 @@ class CanvasRenderBox extends RenderBox {
 
   ///searched text details
   late List<MatchedItem>? textCollection;
+
+  ///次高亮文字信息
+  late List<MatchedItem>? textHighLightCollection;
 
   /// PdfTextSearchResult instance
   late PdfTextSearchResult pdfTextSearchResult;
@@ -368,6 +378,9 @@ class CanvasRenderBox extends RenderBox {
 
     _performSelection_test(details.localPosition);
     if (textCollection == null && !_textSelectionHelper.enableTapSelection) {
+      clearSelection();
+    }
+    if (textHighLightCollection == null && !_textSelectionHelper.enableTapSelection) {
       clearSelection();
     }
     if (_textSelectionHelper.enableTapSelection &&
@@ -959,6 +972,9 @@ class CanvasRenderBox extends RenderBox {
     if (textCollection != null && _textSelectionHelper.historyEntry != null) {
       Navigator.of(context).maybePop();
     }
+    if (textHighLightCollection != null && _textSelectionHelper.historyEntry != null) {
+      Navigator.of(context).maybePop();
+    }
     _textSelectionHelper.historyEntry = null;
     clearSelection();
   }
@@ -1339,6 +1355,47 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
+  /// Perform text search.    执行文本搜索。
+  void _performTextHighLight(Canvas canvas, Offset offset) {
+    if (textHighLightCollection != null && !_textSelectionHelper.selectionEnabled) {
+      final Paint searchTextPaint = Paint()
+        ..color = searchTextHighlightColor.withOpacity(0.3);
+      final Paint currentInstancePaint = Paint()
+        ..color = searchTextHighlightColor.withOpacity(0.3);
+      int _pageNumber = 0;
+      for (int i = 0; i < textHighLightCollection!.length; i++) {
+        final MatchedItem item = textHighLightCollection![i];
+        final double heightPercentage =
+            pdfDocument!.pages[item.pageIndex].size.height / height;
+        if (pageIndex == item.pageIndex) {
+          canvas.drawRect(
+              offset.translate(
+                  textHighLightCollection![i].bounds.left / heightPercentage,
+                  textHighLightCollection![i].bounds.top / heightPercentage) &
+              Size(textHighLightCollection![i].bounds.width / heightPercentage,
+                  textHighLightCollection![i].bounds.height / heightPercentage),
+              searchTextPaint);
+        }
+        final MatchedItem matchedItem =
+        textHighLightCollection![pdfTextSearchResult.currentInstanceIndex - 1];
+        if (matchedItem.pageIndex == pageIndex) {
+          if (matchedItem.pageIndex + 1 != _pageNumber) {
+            final Rect bounds = matchedItem.bounds;
+            canvas.drawRect(
+                offset.translate(bounds.left / heightPercentage,
+                    bounds.top / heightPercentage) &
+                Size(bounds.width / heightPercentage,
+                    bounds.height / heightPercentage),
+                currentInstancePaint);
+            _pageNumber = matchedItem.pageIndex + 1;
+          }
+        } else if (item.pageIndex > pageIndex) {
+          break;
+        }
+      }
+    }
+  }
+
   /// Perform mouse or touch selection.   执行鼠标或触摸选择。
   void _performSelection(
       Canvas canvas, Offset offset, Paint textPaint, Paint bubblePaint) {
@@ -1559,6 +1616,7 @@ class CanvasRenderBox extends RenderBox {
 
     _performDocumentLinkNavigation(canvas, offset);
     _performTextSearch(canvas, offset);
+    _performTextHighLight(canvas, offset);
     _highLightText(canvas, offset);
     _setHighLightText(canvas, offset);
     // var nowTime1 = DateTime.now();//获取当前时间
