@@ -3122,6 +3122,44 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
             ?.currentState
             ?.canvasRenderBox!.setTextLinesList(_pdfViewerController.textLines);
       }
+    }
+    else if (property == 'textInformationListSelection') {
+      // if(_pdfPagesKey[_pdfViewerController.pageNumber]
+      //     ?.currentState
+      //     ?.canvasRenderBox !=
+      //     null){
+      //   _pdfPagesKey[_pdfViewerController.pageNumber]
+      //       ?.currentState
+      //       ?.canvasRenderBox!.getTextInfomation(_pdfViewerController.pageNum,_pdfViewerController.textLinesAll,_pdfViewerController.lineNum,_pdfViewerController.textIndex);
+      // }
+      _isSearchStarted = true;
+      _pdfViewerController._pdfTextSearchResult.removeListener(_handleTextSearch);
+      // MatchedItem matchedItem =MatchedItem.;// MatchedItemHelper.initialize("",_pdfViewerController.textLinesAll[0].bounds,_pdfViewerController.pageNum);
+      //
+      // final List<MatchedItem> result = <MatchedItem>[];
+      // result.add(MatchedItemHelper.initialize(
+      //     term, rect, _currentPageIndex));
+      // List<MatchedItem>? textLinesHighLight =;
+      // textLinesHighLight.add(matchedItem);
+      _textCollection = _pdfTextExtractor?.findText(<String>[_pdfViewerController._searchText], searchOption: _pdfViewerController._textSearchOption,startPageIndex: 2,text: _pdfViewerController.text,rect:_pdfViewerController.bounds,pageNum: _pdfViewerController.pageNum );
+      if (_textCollection != null) {
+        if (_textCollection!.isEmpty) {
+          _pdfViewerController._pdfTextSearchResult._currentOccurrenceIndex = 0;
+
+          _pdfViewerController._pdfTextSearchResult._totalSearchTextCount = 0;
+          _pdfViewerController._pdfTextSearchResult._updateResult(false);
+        } else {
+          _pdfViewerController._pdfTextSearchResult._currentOccurrenceIndex = _getInstanceInPage(_pdfViewerController.pageNumber);
+          if (_pdfPages.isNotEmpty && !_isSearchInitiated) {
+            _jumpToSearchInstance();
+          }
+          _pdfViewerController._pdfTextSearchResult._totalSearchTextCount = _textCollection!.length;
+          _pdfViewerController._pdfTextSearchResult._updateResult(true);
+          _isSearchInitiated = false;
+        }
+        _pdfViewerController._pdfTextSearchResult.addListener(_handleTextSearch);
+        setState(() {});
+      }
     }else if (property == 'jumpTo') {
       _clearSelection();
       if (widget.pageLayoutMode == PdfPageLayoutMode.single) {
@@ -4286,6 +4324,22 @@ class PdfViewerController extends _ValueChangeNotifier {
   List<TextLine>? getTextLinesList(){
     return textLines!;
   }
+
+  int pageNum = 0;
+  String? text;
+  Rect? bounds;
+  /// pagenum 页码
+  /// textlines 页数中行的数据
+  /// linenum 行的数据
+  /// textindex 指定的文字
+  void setTextInfomation(String? text,Rect bounds,int pageNum,){
+    this.pageNum = pageNum;
+    this.text = text;
+    this.bounds = bounds;
+    notifyPropertyChangedListeners(
+        property: 'textInformationListSelection');
+  }
+
 }
 
 /// PdfTextSearchResult holds the details of TextSearch

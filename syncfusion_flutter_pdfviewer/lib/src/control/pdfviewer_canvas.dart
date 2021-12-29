@@ -497,7 +497,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Handles the drag update event.
+  /// Handles the drag update event.   处理拖动更新事件。
   void handleDragUpdate(DragUpdateDetails details) {
     if (kIsDesktop && !isMobileWebView && _isMousePointer) {
       _updateSelectionPan(details);
@@ -1077,32 +1077,34 @@ class CanvasRenderBox extends RenderBox {
       // var nowTime2 = DateTime.now();//获取当前时间
       // print("AAAA---paint textline2" +nowTime2.toString());
     // }
-    for (int textLineIndex = 0; textLineIndex < _textSelectionHelper.textLines!.length; textLineIndex++) {
-      final TextLine line = _textSelectionHelper.textLines![textLineIndex];
-      final List<TextWord> textWordCollection = line.wordCollection;
-      for (int wordIndex = 0; wordIndex < textWordCollection.length; wordIndex++) {
-        final TextWord textWord = textWordCollection[wordIndex];
 
-        final Rect wordBounds = textWord.bounds;
-        if (_tapDetails != null &&
-            wordBounds.contains(_tapDetails! * heightPercentage)) {
-          // _textSelectionHelper.startBubbleLine =
-          // _textSelectionHelper.textLines![textLineIndex];
-          _textSelectionHelper.copiedText = textWord.text;
-          if (onTextSelectionChanged != null) {
-            onTextSelectionChanged!(PdfTextSelectionChangedDetails(textWord.text, textWord.bounds));
-          }
-          highText = textWord;
-          var nowTime1 = DateTime.now();//获取当前时间
-          print("AAAA---paint font" +nowTime1.toString());
-          print("copiedtext = "+textWord.text );
-          // print(textWord.bounds.top);
-          // print(textWord.bounds.bottom);
-          // print(textWord.bounds.left);
-          // print(textWord.bounds.right);
-        }
-      }
-    }
+    ///在插件里获取文字的坐标和位置    调用方法// pdfViewerController.setTextLinesList(textLineAll);
+    // for (int textLineIndex = 0; textLineIndex < _textSelectionHelper.textLines!.length; textLineIndex++) {
+    //   final TextLine line = _textSelectionHelper.textLines![textLineIndex];
+    //   final List<TextWord> textWordCollection = line.wordCollection;
+    //   for (int wordIndex = 0; wordIndex < textWordCollection.length; wordIndex++) {
+    //     final TextWord textWord = textWordCollection[wordIndex];
+    //
+    //     final Rect wordBounds = textWord.bounds;
+    //     if (_tapDetails != null &&
+    //         wordBounds.contains(_tapDetails! * heightPercentage)) {
+    //       // _textSelectionHelper.startBubbleLine =
+    //       // _textSelectionHelper.textLines![textLineIndex];
+    //       _textSelectionHelper.copiedText = textWord.text;
+    //       if (onTextSelectionChanged != null) {
+    //         onTextSelectionChanged!(PdfTextSelectionChangedDetails(textWord.text, textWord.bounds));
+    //       }
+    //       highText = textWord;
+    //       var nowTime1 = DateTime.now();//获取当前时间
+    //       print("AAAA---paint font" +nowTime1.toString());
+    //       print("copiedtext = "+textWord.text );
+    //       // print(textWord.bounds.top);
+    //       // print(textWord.bounds.bottom);
+    //       // print(textWord.bounds.left);
+    //       // print(textWord.bounds.right);
+    //     }
+    //   }
+    // }
   }
   TextWord? highText;
   /// 点击后的文字高亮
@@ -1558,6 +1560,7 @@ class CanvasRenderBox extends RenderBox {
     _performDocumentLinkNavigation(canvas, offset);
     _performTextSearch(canvas, offset);
     _highLightText(canvas, offset);
+    _setHighLightText(canvas, offset);
     // var nowTime1 = DateTime.now();//获取当前时间
     // print("AAAA---paint" +nowTime1.toString());
 
@@ -1814,6 +1817,7 @@ class CanvasRenderBox extends RenderBox {
     this.highText = highLightText;
   }
   List<TextLine>? textLines = [];
+  ///高亮显示点击后的文字  动态传入行数据
   void setTextLinesList( List<TextLine>? textLines){
     // for(int i = 0; i < textLines!.length;i++){
     //   this.textLines!.add(textLines[i]);
@@ -1821,5 +1825,50 @@ class CanvasRenderBox extends RenderBox {
     this.textLines = textLines;
     _textSelectionHelper.textLines = textLines;
     //
+  }
+
+  TextWord? specifiedText;//指定文字
+
+
+  /// 设置指定文字显示高亮
+  void _setHighLightText(Canvas canvas, Offset offset) {
+    if(specifiedText != null && !_textSelectionHelper.selectionEnabled){
+      final Paint searchTextPaint = Paint()
+        ..color = searchTextHighlightColor.withOpacity(0.3);
+
+
+      canvas.drawRect(
+          offset.translate(
+              specifiedText!.bounds.left / heightPercentage,
+              specifiedText!.bounds.top / heightPercentage) &
+          Size(specifiedText!.bounds.width / heightPercentage,
+              specifiedText!.bounds.height / heightPercentage),
+          searchTextPaint);
+      final Paint currentInstancePaint = Paint()
+        ..color = searchTextHighlightColor.withOpacity(0.6);
+
+      canvas.drawRect(
+          offset.translate(specifiedText!.bounds.left / heightPercentage,
+              specifiedText!.bounds.top / heightPercentage) &
+          Size(specifiedText!.bounds.width / heightPercentage,
+              specifiedText!.bounds.height / heightPercentage),
+          currentInstancePaint);
+    }
+  }
+  double heightPercentage = 0;
+  /// 获取指定文字的详细信息
+  void getTextInfomation(int pageNum,List<TextLine>? textLines,int? lineNum,int? textIndex,) {
+    _textSelectionHelper.copiedText = '';
+
+   heightPercentage = pdfDocument!.pages[pageNum].size.height / height;
+    _textSelectionHelper.heightPercentage = heightPercentage;
+
+    _textSelectionHelper.viewId = pageNum;
+    _textSelectionHelper.textLines = textLines;
+
+    final TextLine line = _textSelectionHelper.textLines![lineNum!];
+    final List<TextWord> textWordCollection = line.wordCollection;
+    final TextWord textWord = textWordCollection[textIndex!];
+    specifiedText = textWord;
   }
 }
