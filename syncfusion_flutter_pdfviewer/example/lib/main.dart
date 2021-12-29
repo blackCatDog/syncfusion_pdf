@@ -178,6 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         if (details.offset != null && wordBounds.contains(details.offset! * details.heightPercentage!)) {
                           print("点击的文字是： " + textWord.text);
                           pdfViewerController.setTextInfomation('exactly',textWord.bounds,details.pageNum!);
+                          pdfViewerController.setTextInfomationHighLight('exactly',line.bounds,2);
                           // setState(() {});
                           // pdfViewerController.setHighLightText(textWord);
                           var nowTime1 = DateTime.now();//获取当前时间
@@ -206,13 +207,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       print(text);
                       List<TextWord> textWordCollection = line.wordCollection;
                       document.dispose();
+                      pdfViewerController.setTextInfomationHighLight('exactly',textLine[3].bounds,2);
                       pdfViewerController.setTextInfomation('exactly',textWordCollection[0].bounds,2);
                       Future.delayed(Duration(milliseconds: 500), () {
+                        // pdfViewerController.setTextInfomationHighLight('exactly',textLine[4].bounds,2);
                         pdfViewerController.setTextInfomation('exactly',textWordCollection[1].bounds,2);
                         Future.delayed(Duration(milliseconds: 500), () {
                           pdfViewerController.setTextInfomation('exactly', textWordCollection[2].bounds,2);
                           Future.delayed(Duration(milliseconds: 500), () {
                             pdfViewerController.setTextInfomation('exactly', textWordCollection[3].bounds,2);
+                            pdfViewerController.setTextInfomationHighLight('exactly',textLine[4].bounds,2);
                             Future.delayed(Duration(milliseconds: 500), () {
                               pdfViewerController.setTextInfomation('exactly', textWordCollection[4].bounds,2);
                             });
