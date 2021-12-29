@@ -150,45 +150,82 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Container(
-            child: SfPdfViewer.asset("assets/pdf/gis_succinctly.pdf",
-              onTextSelectionChanged:
-                  (PdfTextSelectionChangedDetails details) {
+        child: Stack(
+          children: [
+            Container(
+                child: SfPdfViewer.asset("assets/pdf/gis_succinctly.pdf",
+                  onTextSelectionChanged:
+                      (PdfTextSelectionChangedDetails details) {
 
-                if (details.selectedText == null ) {
-                  // _overlayEntry.remove();
-                  // _overlayEntry = null;
-                } else if (details.selectedText != null ) {
-                  _showContextMenu(context, details);
-                }
-              },
-              onSelectionText:(PdfSelectionTextDetails details){
-                pdfViewerController.setTextLinesList(textLineAll);
-                // for (int textLineIndex = 0; textLineIndex < textLineAll!.length; textLineIndex++) {
-                //   final TextLine? line = textLineAll![textLineIndex];
-                //   final List<TextWord> textWordCollection = line!.wordCollection;
-                //   for (int wordIndex = 0; wordIndex < textWordCollection.length; wordIndex++) {
-                //     final TextWord textWord = textWordCollection[wordIndex];
-                //
-                //     final Rect wordBounds = textWord.bounds;
-                //     if (details.offset != null && wordBounds.contains(details.offset! * details.heightPercentage!)) {
-                //       print("点击的文字是： " + textWord.text);
-                //       // setState(() {});
-                //       pdfViewerController.setHighLightText(textWord);
-                //       var nowTime1 = DateTime.now();//获取当前时间
-                //       print("AAAA---paint font" +nowTime1.toString());
-                //     }
-                //   }
-                // }
-                setState(() {
-                  var nowTime1 = DateTime.now();//获取当前时间
-                  print("AAAA---paint callback " +nowTime1.toString());
-                  flog = true;});
-              },
-              controller: pdfViewerController,
+                    if (details.selectedText == null ) {
+                      // _overlayEntry.remove();
+                      // _overlayEntry = null;
+                    } else if (details.selectedText != null ) {
+                      _showContextMenu(context, details);
+                    }
+                  },
+                  onSelectionText:(PdfSelectionTextDetails details){
 
-              // controller: _pdfViewerController,
-            )),
+                    // pdfViewerController.setTextLinesList(textLineAll);
+
+                    for (int textLineIndex = 0; textLineIndex < textLineAll!.length; textLineIndex++) {
+                      final TextLine? line = textLineAll![textLineIndex];
+                      final List<TextWord> textWordCollection = line!.wordCollection;
+                      for (int wordIndex = 0; wordIndex < textWordCollection.length; wordIndex++) {
+                        final TextWord textWord = textWordCollection[wordIndex];
+
+                        final Rect wordBounds = textWord.bounds;
+                        if (details.offset != null && wordBounds.contains(details.offset! * details.heightPercentage!)) {
+                          print("点击的文字是： " + textWord.text);
+                          pdfViewerController.setTextInfomation('exactly',textWord.bounds,details.pageNum!);
+                          // setState(() {});
+                          // pdfViewerController.setHighLightText(textWord);
+                          var nowTime1 = DateTime.now();//获取当前时间
+                          print("AAAA---paint font" +nowTime1.toString());
+                        }
+                      }
+                    }
+                    setState(() {
+                      var nowTime1 = DateTime.now();//获取当前时间
+                      print("AAAA---paint callback " +nowTime1.toString());
+                      flog = true;});
+                  },
+                  controller: pdfViewerController,
+
+                  // controller: _pdfViewerController,
+                )),
+                  ElevatedButton(
+                    child: Text("点击高亮显示文字"),
+                    onPressed: () async{
+
+                      PdfDocument document = PdfDocument(inputBytes: await _readDocumentData('gis_succinctly.pdf'));
+                      final List<TextLine> textLine = PdfTextExtractor(document).extractTextLines(startPageIndex: 2);
+                      TextLine line = textLine[3];
+                      Rect bounds = line.bounds;
+                      String text = line.text;
+                      print(text);
+                      List<TextWord> textWordCollection = line.wordCollection;
+                      document.dispose();
+                      pdfViewerController.setTextInfomation('exactly',textWordCollection[0].bounds,2);
+                      Future.delayed(Duration(milliseconds: 500), () {
+                        pdfViewerController.setTextInfomation('exactly',textWordCollection[1].bounds,2);
+                        Future.delayed(Duration(milliseconds: 500), () {
+                          pdfViewerController.setTextInfomation('exactly', textWordCollection[2].bounds,2);
+                          Future.delayed(Duration(milliseconds: 500), () {
+                            pdfViewerController.setTextInfomation('exactly', textWordCollection[3].bounds,2);
+                            Future.delayed(Duration(milliseconds: 500), () {
+                              pdfViewerController.setTextInfomation('exactly', textWordCollection[4].bounds,2);
+                            });
+                          });
+                        });
+                      });
+                      // _searchResult = await pdfViewerController.searchText('exactly',
+                      //     searchOption: TextSearchOption.caseSensitive,);
+                    },
+                  ),
+          ],
+        ),
+
 
 
       ),
@@ -197,5 +234,9 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), );
+  }
+
+  void setHighLightText(){
+
   }
 }
