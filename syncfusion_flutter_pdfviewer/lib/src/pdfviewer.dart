@@ -3149,7 +3149,7 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
       // }
       _isSearchStarted = true;
       _pdfViewerController._pdfTextSearchResult.removeListener(_handleTextSearch);
-      _textCollection = _pdfTextExtractor?.findText(<String>[_pdfViewerController._searchText], searchOption: _pdfViewerController._textSearchOption,startPageIndex: 2,text: _pdfViewerController.text,rect:_pdfViewerController.bounds,pageNum: _pdfViewerController.pageNum );
+      _textCollection = _pdfTextExtractor?.findText(<String>[_pdfViewerController._searchText], searchOption: _pdfViewerController._textSearchOption,startPageIndex: 2,itemLine: _pdfViewerController.item);
       if (_textCollection != null) {
         if (_textCollection!.isEmpty) {
           _pdfViewerController._pdfTextSearchResult._currentOccurrenceIndex = 0;
@@ -3171,7 +3171,7 @@ class SfPdfViewerState extends State<SfPdfViewer> with WidgetsBindingObserver {
     }else if (property == 'textHighLightSelection') {
       _isSearchStarted = true;
       _pdfViewerController._pdfTextSearchResult.removeListener(_handleTextSearch);
-      _textHighLightCollection = _pdfTextExtractor?.findText(<String>[_pdfViewerController._searchText], searchOption: _pdfViewerController._textSearchOption,startPageIndex: 2,text: _pdfViewerController.text,rect:_pdfViewerController.bounds,pageNum: _pdfViewerController.pageNum );
+      _textHighLightCollection = _pdfTextExtractor?.findText(<String>[_pdfViewerController._searchText], searchOption: _pdfViewerController._textSearchOption,startPageIndex: 2,itemLine: _pdfViewerController.itemLine );
       if (_textHighLightCollection != null) {
         if (_textHighLightCollection!.isEmpty) {
           _pdfViewerController._pdfTextSearchResult._currentOccurrenceIndex = 0;
@@ -4392,31 +4392,33 @@ class PdfViewerController extends _ValueChangeNotifier {
     return textLines!;
   }
 
-  int pageNum = 0;
-  String? text;
-  Rect? bounds;
+  // int pageNum = 0;
+  // String? text;
+  // Rect? bounds;
+  List<MatchedItem> item = [];
   /// pagenum 页码
   /// textlines 页数中行的数据
   /// linenum 行的数据
   /// textindex 指定的文字
-  void setTextInfomation(String? text,Rect bounds,int pageNum,){
-    this.pageNum = pageNum;
-    this.text = text;
-    this.bounds = bounds;
+  void setTextInfomation(List<MatchedItem> item){
+    this.item = item;
+    // this.text = text;
+    // this.bounds = bounds;
     notifyPropertyChangedListeners(
         property: 'textInformationListSelection');
   }
 
+  List<MatchedItem> itemLine = [];
 
   /// pagenum 页码
   /// textlines 页数中行的数据
   /// linenum 行的数据
   /// textindex 指定的文字
   /// 次高亮位置   文字信息
-  void setTextInfomationHighLight(String? text,Rect bounds,int pageNum,){
-    this.pageNum = pageNum;
-    this.text = text;
-    this.bounds = bounds;
+  void setTextInfomationHighLight(List<MatchedItem> itemLine){
+    this.itemLine = itemLine;
+    // this.text = text;
+    // this.bounds = bounds;
     notifyPropertyChangedListeners(
         property: 'textHighLightSelection');
   }
