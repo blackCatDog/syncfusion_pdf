@@ -3,7 +3,11 @@ import 'dart:ui';
 /// Details of the searched text
 class MatchedItem {
   //Constructor
-  MatchedItem._(this.text, this.bounds, this.pageIndex);
+  MatchedItem(String text, Rect bounds, int pageIndex){
+    this.text = text;
+    this.bounds = bounds;
+    this.pageIndex = pageIndex;
+  }
 
   //Fields
   /// The searched text.
@@ -21,6 +25,6 @@ class MatchedItem {
 class MatchedItemHelper {
   /// internal method
   static MatchedItem initialize(String text, Rect bounds, int pageIndex) {
-    return MatchedItem._(text, bounds, pageIndex);
+    return new MatchedItem(text, bounds, pageIndex);
   }
 }

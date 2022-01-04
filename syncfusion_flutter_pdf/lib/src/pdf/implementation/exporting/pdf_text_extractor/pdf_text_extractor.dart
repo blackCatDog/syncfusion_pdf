@@ -145,8 +145,8 @@ class PdfTextExtractor {
   List<MatchedItem> findText(List<String> searchString,
       {int? startPageIndex,
       int? endPageIndex,
-      TextSearchOption? searchOption,String? text,Rect? rect,int? pageNum,}) {
-    return _findText(searchString, startPageIndex, endPageIndex, searchOption,text,rect,pageNum);
+      TextSearchOption? searchOption,List<MatchedItem>? itemLine}) {
+    return _findText(searchString, startPageIndex, endPageIndex, searchOption,itemLine!);
   }
 
   //Implementation
@@ -205,22 +205,22 @@ class PdfTextExtractor {
   }
 
   List<MatchedItem> _findText(List<String> searchString, int? startPageIndex,
-      int? endPageIndex, TextSearchOption? searchOption,String? text,Rect? bounds,int? pageNum,) {
+      int? endPageIndex, TextSearchOption? searchOption,List<MatchedItem> itemLine) {
     if (startPageIndex == null) {
       if (endPageIndex != null) {
         throw ArgumentError.value(endPageIndex, 'endPageIndex',
             'Invalid argument. start page index cannot be null');
       } else {
         return _findTextFromRange(
-            0, _document.pages.count - 1, searchString, searchOption,text,bounds,pageNum);
+            0, _document.pages.count - 1, searchString, searchOption,itemLine);
       }
     } else if (endPageIndex == null) {
       _checkPageNumber(startPageIndex);
       _currentPageIndex = startPageIndex;
-      if(text != null){
-        List<MatchedItem> textLines=[];
-        textLines.add(MatchedItemHelper.initialize(text, bounds!, pageNum!));
-        return textLines;
+      if(itemLine != null){
+        // List<MatchedItem> textLines=[];
+        // textLines.add(MatchedItemHelper.initialize(text, bounds!, pageNum!));
+        return itemLine;
       }else{
         return _searchInBackground(
             _document.pages[startPageIndex], searchString, searchOption);
@@ -230,7 +230,7 @@ class PdfTextExtractor {
       _checkPageNumber(startPageIndex);
       _checkPageNumber(endPageIndex);
       return _findTextFromRange(
-          startPageIndex, endPageIndex, searchString, searchOption,text,bounds,pageNum);
+          startPageIndex, endPageIndex, searchString, searchOption,itemLine);
     }
   }
 
@@ -257,14 +257,15 @@ class PdfTextExtractor {
   }
 
   List<MatchedItem> _findTextFromRange(int startPageIndex, int endPageIndex,
-      List<String> searchString, TextSearchOption? searchOption,String? text,Rect? bounds,int? pageNum,) {
+      List<String> searchString, TextSearchOption? searchOption,List<MatchedItem> itemLine) {
     final List<MatchedItem> result = <MatchedItem>[];
     for (int i = startPageIndex; i <= endPageIndex; i++) {
       _currentPageIndex = i;
 
       List<MatchedItem> textLines=[];
-      if(text != null && bounds != null){
-        textLines.add(MatchedItemHelper.initialize(text, bounds, pageNum!));
+      if(itemLine != null && itemLine.length >0){
+        // textLines.add(MatchedItemHelper.initialize(text, bounds, pageNum!));
+        textLines = itemLine;
       }
       else{
         textLines = _searchInBackground(_document.pages[i], searchString, searchOption);
