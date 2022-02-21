@@ -1083,105 +1083,8 @@ class CanvasRenderBox extends RenderBox {
       if (onSelectionText != null) {
         onSelectionText!(PdfSelectionTextDetails(_textSelectionHelper.viewId!, height,_textSelectionHelper.heightPercentage,offset));
       }
-
-
-    // if (_textSelectionHelper.textLines == null || _textSelectionHelper.viewId != pageIndex) {
-    //   _textSelectionHelper.viewId = pageIndex;
-      // var nowTime1 = DateTime.now();//获取当前时间
-      // print("AAAA---paint textline" +nowTime1.toString());
-      // _textSelectionHelper.textLines = textLines;//PdfTextExtractor(pdfDocument!).extractTextLines(startPageIndex: pageIndex);
-      // var nowTime2 = DateTime.now();//获取当前时间
-      // print("AAAA---paint textline2" +nowTime2.toString());
-    // }
-
-    ///在插件里获取文字的坐标和位置    调用方法// pdfViewerController.setTextLinesList(textLineAll);
-    // for (int textLineIndex = 0; textLineIndex < _textSelectionHelper.textLines!.length; textLineIndex++) {
-    //   final TextLine line = _textSelectionHelper.textLines![textLineIndex];
-    //   final List<TextWord> textWordCollection = line.wordCollection;
-    //   for (int wordIndex = 0; wordIndex < textWordCollection.length; wordIndex++) {
-    //     final TextWord textWord = textWordCollection[wordIndex];
-    //
-    //     final Rect wordBounds = textWord.bounds;
-    //     if (_tapDetails != null &&
-    //         wordBounds.contains(_tapDetails! * heightPercentage)) {
-    //       // _textSelectionHelper.startBubbleLine =
-    //       // _textSelectionHelper.textLines![textLineIndex];
-    //       _textSelectionHelper.copiedText = textWord.text;
-    //       if (onTextSelectionChanged != null) {
-    //         onTextSelectionChanged!(PdfTextSelectionChangedDetails(textWord.text, textWord.bounds));
-    //       }
-    //       highText = textWord;
-    //       var nowTime1 = DateTime.now();//获取当前时间
-    //       print("AAAA---paint font" +nowTime1.toString());
-    //       print("copiedtext = "+textWord.text );
-    //       // print(textWord.bounds.top);
-    //       // print(textWord.bounds.bottom);
-    //       // print(textWord.bounds.left);
-    //       // print(textWord.bounds.right);
-    //     }
-    //   }
-    // }
   }
   TextWord? highText;
-  /// 点击后的文字高亮
-  void _highLightText(Canvas canvas, Offset offset) {
-    if(highText != null && !_textSelectionHelper.selectionEnabled){
-
-
-      final Paint searchTextPaint = Paint()
-        ..color = searchTextHighlightColor.withOpacity(0.3);
-      final Paint currentInstancePaint = Paint()
-        ..color = searchTextHighlightColor.withOpacity(0.6);
-      // int _pageNumber = 0;
-      // for (int i = 0; i < textCollection!.length; i++) {
-      //   final MatchedItem item = textCollection![i];
-        final double heightPercentage = pdfDocument!.pages[_textSelectionHelper.viewId!].size.height / height;
-
-      var nowTime1 = DateTime.now();//获取当前时间
-      print("AAAA---paint high" +nowTime1.toString());
-      // print(highText!.bounds.top);
-      // print(highText!.bounds.bottom);
-      // print(highText!.bounds.left);
-      // print(highText!.bounds.right);
-      //   if (pageIndex == item.pageIndex) {
-          canvas.drawRect(
-              offset.translate(
-                  highText!.bounds.left / heightPercentage,
-                  highText!.bounds.top / heightPercentage) &
-              Size(highText!.bounds.width / heightPercentage,
-                  highText!.bounds.height / heightPercentage),
-              searchTextPaint);
-      // canvas.drawRect(
-      //                 offset.translate(highText!.bounds.left / heightPercentage,
-      //                     highText!.bounds.top / heightPercentage) &
-      //                 Size(highText!.bounds.width / heightPercentage,
-      //                     highText!.bounds.height / heightPercentage),
-      //                 currentInstancePaint);
-
-      // enableSelection();
-      // markNeedsPaint();
-      // scroll(true,true);
-    }
-    //     }
-    //     final MatchedItem matchedItem =
-    //     textCollection![pdfTextSearchResult.currentInstanceIndex - 1];
-    //     if (matchedItem.pageIndex == pageIndex) {
-    //       if (matchedItem.pageIndex + 1 != _pageNumber) {
-    //         final Rect bounds = matchedItem.bounds;
-    //         canvas.drawRect(
-    //             offset.translate(bounds.left / heightPercentage,
-    //                 bounds.top / heightPercentage) &
-    //             Size(bounds.width / heightPercentage,
-    //                 bounds.height / heightPercentage),
-    //             currentInstancePaint);
-    //         _pageNumber = matchedItem.pageIndex + 1;
-    //       }
-    //     } else if (item.pageIndex > pageIndex) {
-    //       break;
-    //     }
-    //   }
-    // }
-  }
 
   /// Get the selection details like copiedText,globalSelectedRegion.     获取选择细节，如copytext, globalselecteregion。
   TextSelectionHelper getSelectionDetails() {
@@ -1314,7 +1217,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Perform text search.    执行文本搜索。
+  /// Perform text search.    执行文本搜索。   显示词高亮
   void _performTextSearch(Canvas canvas, Offset offset) {
     if (textCollection != null && !_textSelectionHelper.selectionEnabled) {
       final Paint searchTextPaint = Paint()
@@ -1355,7 +1258,7 @@ class CanvasRenderBox extends RenderBox {
     }
   }
 
-  /// Perform text search.    执行文本搜索。
+  /// Perform text search.    执行文本搜索。 句子显示高亮
   void _performTextHighLight(Canvas canvas, Offset offset) {
     if (textHighLightCollection != null && !_textSelectionHelper.selectionEnabled) {
       final Paint searchTextPaint = Paint()

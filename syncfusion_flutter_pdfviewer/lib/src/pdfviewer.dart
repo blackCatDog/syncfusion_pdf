@@ -4396,6 +4396,7 @@ class PdfViewerController extends _ValueChangeNotifier {
   // String? text;
   // Rect? bounds;
   List<MatchedItem> item = [];
+  ///文字改变 刷新高亮
   /// pagenum 页码
   /// textlines 页数中行的数据
   /// linenum 行的数据
@@ -4410,6 +4411,7 @@ class PdfViewerController extends _ValueChangeNotifier {
 
   List<MatchedItem> itemLine = [];
 
+  ///句子改变 刷新高亮信息	jiangbo	2021-12-29 12:41
   /// pagenum 页码
   /// textlines 页数中行的数据
   /// linenum 行的数据

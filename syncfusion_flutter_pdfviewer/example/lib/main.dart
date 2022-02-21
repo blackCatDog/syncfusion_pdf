@@ -127,26 +127,13 @@ class _MyHomePageState extends State<MyHomePage> {
   List<TextLine>? textLineAll = [];
   PdfDocument? document;
 
+  ///点击加号获取pdf第二页的数据
   void _incrementCounter() async{
     document = PdfDocument(
         inputBytes: await _readDocumentData('gis_succinctly.pdf'));
 
     //Extracts the text line collection from the document
     textLineAll = PdfTextExtractor(document!).extractTextLines(startPageIndex: 2);
-
-    // List<MatchedItem> textCollection = PdfTextExtractor(document).findText(
-    //     ['So', 'So'],
-    //     startPageIndex: 1,
-    //     endPageIndex: 2,
-    //     searchOption: TextSearchOption.caseSensitive);
-
-    //Gets specific line from the collection
-    // TextLine? line = textLineAll![1];
-
-    //Gets bounds of the line
-    // Rect bounds = line!.bounds;
-
-    //Dispose the document.
     document!.dispose();
   }
   PdfViewerController pdfViewerController = PdfViewerController();
@@ -228,36 +215,37 @@ class _MyHomePageState extends State<MyHomePage> {
                     }
                   },
                   searchTextHighlightColor: Color(0x004985FD) ,
+                  //当点击的文字改变时
                   onSelectionText:(PdfSelectionTextDetails details){
 
-                    // pdfViewerController.setTextLinesList(textLineAll);
-
+                  //循环行数据
                     for (int textLineIndex = 0; textLineIndex < textLineAll!.length; textLineIndex++) {
-                      final TextLine? line = textLineAll![textLineIndex];
-                      final List<TextWord> textWordCollection = line!.wordCollection;
-                      for (int wordIndex = 0; wordIndex < textWordCollection.length; wordIndex++) {
+                      final TextLine? line = textLineAll![textLineIndex];//每行的数据
+                      final List<TextWord> textWordCollection = line!.wordCollection;//从行数据取出字的数据位置等信息
+                      for (int wordIndex = 0; wordIndex < textWordCollection.length; wordIndex++) {//循环字的数据
                         final TextWord textWord = textWordCollection[wordIndex];
 
-                        final Rect wordBounds = textWord.bounds;
+                        final Rect wordBounds = textWord.bounds;//获取字的位置信息
+                        //判断点击位置是否为空，和第二页字的信息中是否包含点击的字的位置信息
                         if (details.offset != null && wordBounds.contains(details.offset! * details.heightPercentage!)) {
-                          print("点击的文字是： " + textWord.text);
-                          print("点击的line = " + line.text);
+                          print("点击的文字是： " + textWord.text);//取到点击的文字
+                          print("点击的line = " + line.text);//取到点击的行的文字
 
-                          List<MatchedItem>? itemLinex = [];
+                          //点击一个词后，获取整句话 然后高亮信息
                           List<MatchedItem> textLines = getSentence(textLineAll!,textLineIndex,textWordCollection,wordIndex);
-                          // MatchedItem matchedItem = new MatchedItem(textLines.text, textLines.bounds, 2);
-                          // itemLinex.add(matchedItem);
                           List<MatchedItem>? items = [];
                           MatchedItem matchedItems = new MatchedItem(textWord.text, textWord.bounds, 2);
                           items.add(matchedItems);
+                          //获取字的高亮信息MatchedItem
                           List<MatchedItem>? item = onBeforeFindWord(wordIndex, textWordCollection);
                           if(item!.isNotEmpty){
+                            //单个词改变刷新高亮信息
                             pdfViewerController.setTextInfomation(item);
                           }
+                          //句子改变 刷新高亮信息
                           pdfViewerController.setTextInfomationHighLight(textLines);
                           wordInfoListBefore.clear();
-                          // setState(() {});
-                          // pdfViewerController.setHighLightText(textWord);
+
                           var nowTime1 = DateTime.now();//获取当前时间
                           print("AAAA---paint font" +nowTime1.toString());
                         }
@@ -296,12 +284,11 @@ class _MyHomePageState extends State<MyHomePage> {
   ///进入应用后自动读取文字，传入文字给插件，根据文字找到文字的位置
   void getTextPostion() async{
     PdfDocument document = PdfDocument(inputBytes: await _readDocumentData('gis_succinctly.pdf'));
-    final List<TextLine> textLine = PdfTextExtractor(document).extractTextLines(startPageIndex: 2);
-    TextLine line = textLine[3];
+    final List<TextLine> textLine = PdfTextExtractor(document).extractTextLines(startPageIndex: 2);//第二页的pdf
+    TextLine line = textLine[3];//第三行的行数据
     Rect bounds = line.bounds;
     List<TextWord> textWordCollection = line.wordCollection;
     document.dispose();
-    RegExp exp = RegExp(r"(\w+)");
 
     onAfterFindWord(line, textWordCollection);
   }
@@ -350,9 +337,7 @@ class _MyHomePageState extends State<MyHomePage> {
     List<MatchedItem>? item = [];
     ///for(int k = i;k < textWordCollection.length ;k++){
     int index = wordIndex - 1;///当前需要读取的单词
-    String text = "";//textWordCollection[wordIndex].text;
-    // MatchedItem matchedItems = new MatchedItem(text, textWordCollection[wordIndex].bounds, 2);
-    // item.add(matchedItems);
+    String text = "";
     ///向前取字符数据
     for(int k = index; k >= 0; k--){
       if(checkContainsSymbol(textWordCollection[k].text)) {
@@ -406,25 +391,26 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
+  //自动读取行数据，行显示次高亮，词延时1秒分别显示高亮
   void onAfterFindWord(TextLine line,List<TextWord> textWordCollection) async{
     print("line = " + line.text);
     List<MatchedItem>? items = [];
 
+    //循环词的数据
     for(int i =0;i<textWordCollection.length;i++){
-      // List<MatchedItem>? itemLine = [];
-
       if(i == 0){
         List<MatchedItem>? itemLinex = [];
-        MatchedItem matchedItem = new MatchedItem(line.text, line.bounds, 2);
+        MatchedItem matchedItem = new MatchedItem(line.text, line.bounds, 2);//第二页的行数据
         itemLinex.add(matchedItem);
-        MatchedItem matchedItems = new MatchedItem("text", textWordCollection[i].bounds, 2);
+        MatchedItem matchedItems = new MatchedItem("text", textWordCollection[i].bounds, 2);//第二页的词数据
         items.add(matchedItems);
-        pdfViewerController.setTextInfomationHighLight(itemLinex);
-        pdfViewerController.setTextInfomation(items);
-        await Future.delayed(Duration(milliseconds: 1000), () {
+        pdfViewerController.setTextInfomationHighLight(itemLinex);//显示行高亮的方法
+        pdfViewerController.setTextInfomation(items);//显示词高亮的方法
+        await Future.delayed(Duration(milliseconds: 1000), () {//延时一秒显示词
           // pdfViewerController.setTextInfomation('exactly', textWordCollection[i].bounds,2);
         });
       }else{
+        //同样  读取词可能是一个字母，所以要向前、向后查找是否能组成一个词
         String text = "";
 
         List<MatchedItem>? itemLinex = [];
@@ -491,9 +477,6 @@ class _MyHomePageState extends State<MyHomePage> {
   List<MatchedItem> getSentence( List<TextLine> textLineAll,int textLineIndex,List<TextWord> textWordCollection,int wordIndex){
     List<MatchedItem> matchedItemList = [];
     List<TextWord> wordInfoList = [];//增加到最后的数据中，然后显示行的高亮
-    // List<TextWord> beforeWordInfoList = [];//增加到最后的数据中，然后显示行的高亮
-    // List<TextWord> afterWordInfoList = [];//增加到最后的数据中，然后显示行的高亮
-
 
     int wordIndexSame;//同行的时候取点击后的文字
     List<TextWord> textWordCollectionSame;//同行单词的数组
@@ -627,52 +610,6 @@ class _MyHomePageState extends State<MyHomePage> {
         matchedItemList.add(matchedItems);
       }
 
-    //如果向下多出一行，则下一行从头开始取文字，行的标识则增加一行
-    // wordIndexs = 0;
-    // if(textLineIndex < textLineAll.length-1){
-    //   textLineIndex++;
-    //   textWordCollection = textLineAll[textLineIndex].wordCollection;
-    // }
-    // for(int j = wordIndexs;j < textWordCollection.length;j++){
-    //   if(!checkContainsSymbol(textWordCollection[j].text)){
-    //     if(!checkContainsSentenceSymbol(textWordCollection[j].text)){
-    //       print("text = "+textWordCollection[j].text);
-    //       wordInfoList.add(textWordCollection[j]);
-    //       break;
-    //     }
-    //   }
-    // }
-
-    //如果向上多出一行，则上一行从末尾开始取，行的标识减少一行
-    // wordIndexs = textWordCollection.length-1;
-    // if(textLineIndex < textLineAll.length-1){
-    //   textLineIndex--;
-    //   textWordCollection = textLineAll[textLineIndex].wordCollection;
-    // }
-    // for(int j = wordIndexs;j < textWordCollection.length;j++){
-    //   if(!checkContainsSymbol(textWordCollection[j].text)){
-    //     if(!checkContainsSentenceSymbol(textWordCollection[j].text)){
-    //       print("text = "+textWordCollection[j].text);
-    //       wordInfoList.add(textWordCollection[j]);
-    //       break;
-    //     }
-    //   }
-    // }
-
-    // if(wordInfoList.length > 0){
-    //   if(textLineIndexs == textLineIndex){
-    //     MatchedItem matchedItems = new MatchedItem(textWordCollectionList[wordIndex].text, new Rect.fromLTRB(textWordCollectionList[wordIndex].bounds.left, wordInfoList[0].bounds.top, wordInfoList[0].bounds.right, wordInfoList[0].bounds.bottom), 2);
-    //     // matchedItemList.add(matchedItem);
-    //     matchedItemList.add(matchedItems);
-    //   }
-    //   else{
-    //
-    //   }
-    //   MatchedItem matchedItem = new MatchedItem(wordInfoList[0].text, wordInfoList[0].bounds, 2);
-    //   matchedItemList.add(matchedItem);
-    //   MatchedItem matchedItems = new MatchedItem(textWordCollectionList[wordIndex].text, new Rect.fromLTRB(textWordCollectionList[wordIndex].bounds.left, wordInfoList[0].bounds.top, wordInfoList[0].bounds.right, wordInfoList[0].bounds.bottom), 2);
-    //   // matchedItemList.add(matchedItem);
-    //   matchedItemList.add(matchedItems);}
    return matchedItemList;
 
   }
